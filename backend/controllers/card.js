@@ -4,7 +4,7 @@ const BadRequest = require('../errors/BadRequest');
 const Forbidden = require('../errors/Forbidden');
 
 module.exports.getCard = (req, res, next) => {
-  Card.find({})
+  Card.find({}).sort({ createdAt: -1 })
     .then((card) => res.send(card))
     .catch(next);
 };
@@ -31,7 +31,8 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         next(new Forbidden('Нельзя удалить чужую карточку'));
       } else {
-        Card.findByIdAndRemove(card);
+        Card.findByIdAndRemove(card)
+          .then(() => res.send(card));
       }
     })
     .catch(next);

@@ -8,13 +8,12 @@ import ImagePopup from "./popup/ImagePopup.js";
 import Main from "./Main.js";
 import Api from "../utils/Api.js";
 import React, { useEffect, useState } from "react";
-import { Route, Redirect, Switch, useRouteMatch } from "react-router-dom";
+import { Route, Redirect, Switch, useRouteMatch, useHistory } from "react-router-dom";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 import FormValues from "../hooks/FormValues.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 import Login from "./Login.js";
 import Register from "./Register.js";
-import { useParams, useHistory } from "react-router-dom";
 import InfoTooltip from "./popup/InfoTooltip";
 import Auth from "../utils/Auth.js";
 
@@ -138,7 +137,9 @@ function App() {
   const { values, handleChange, setValues } = FormValues({});
 
   useEffect(() => {
-    checkToken();
+    if (!loggedIn) {
+      checkToken();
+    }
   }, []);
 
   function checkToken() {  
