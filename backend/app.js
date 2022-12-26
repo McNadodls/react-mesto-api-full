@@ -1,11 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 
 const app = express();
 const cookieParser = require('cookie-parser');
 
-const { PORT = 3000 } = process.env;
-const { celebrate, Joi } = require('celebrate');
+const { PORT = 3000, CONNECT_DB, NODE_ENV } = process.env;
+const { celebrate, Joi, errors } = require('celebrate');
 const cors = require('cors');
 const NotFound = require('./errors/NotFound');
 const { login, createUser, logout } = require('./controllers/user');
@@ -16,7 +17,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const options = {
   origin: [
     'http://localhost:3000',
-    'https://mesto.mcnad.nomoredomains.club',
+    'https://mesto.mcnad.nomoredomains.club'
   ],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   preflightContinue: false,
@@ -25,21 +26,16 @@ const options = {
   credentials: true,
 };
 
-app.use('*', cors(options)); // ПЕРВЫМ!
+app.use('*', cors(options));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 mongoose.set('strictQuery', false);
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect(NODE_ENV === 'production' ? CONNECT_DB : 'mongodb://0.0.0.0:27017/mestodb');
 
 app.use(cookieParser());
 app.use(requestLogger);
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
+
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
@@ -59,6 +55,10 @@ app.use(auth);
 app.get('/logout', logout);
 app.use('/users', require('./routes/user'));
 app.use('/cards', require('./routes/card'));
+
+app.use(errors({
+  message: 'Введены некорректные данные',
+}));
 
 app.use((req, res, next) => {
   next(new NotFound('Такой страницы нет'));
