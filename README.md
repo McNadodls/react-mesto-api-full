@@ -43,4 +43,4 @@
 * mongoDB
 
 **Ссылка на проект**
-https://mcnadodls.github.io/mesto/
+https://mesto.mcnad.nomoredomains.club
